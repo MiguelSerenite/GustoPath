@@ -2,7 +2,6 @@ name: Daily Momentum Screener
 
 on:
   schedule:
-    # 20:10 UTC = 16:10 EDT (New York) — apres cloture US
     - cron: '10 20 * * 1-5'
   workflow_dispatch:
     inputs:
@@ -43,39 +42,39 @@ jobs:
 
       - name: Send Telegram report
         if: always()
+        continue-on-error: true
         env:
           RAW_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           RAW_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          # Clean whitespace/newlines from secrets
-          export TELEGRAM_BOT_TOKEN=$(echo "$RAW_TOKEN" | tr -d '[:space:]')
-          export TELEGRAM_CHAT_ID=$(echo "$RAW_CHAT" | tr -d '[:space:]')
-          
-          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
-            echo "Telegram secrets not configured, skipping"
-            exit 0
-          fi
-          
           python3 << 'PYEOF'
-          import json, os, urllib.request, urllib.parse, sys
+          import json, os, urllib.request, urllib.parse, sys, re
 
-          TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
-          CHAT  = os.environ["TELEGRAM_CHAT_ID"]
+          # Aggressive sanitization: keep only alphanumeric, colon, dash
+          raw_token = os.environ.get("RAW_TOKEN", "")
+          raw_chat = os.environ.get("RAW_CHAT", "")
+          TOKEN = re.sub(r'[^a-zA-Z0-9:\-_]', '', raw_token)
+          CHAT = re.sub(r'[^0-9]', '', raw_chat)
+
+          if not TOKEN or not CHAT:
+              print("Telegram secrets not configured, skipping")
+              sys.exit(0)
+
+          print(f"Token length: {len(TOKEN)}, Chat ID: {CHAT}")
+          print(f"Token starts with: {TOKEN[:12]}...")
 
           def send(msg):
+              url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
               data = urllib.parse.urlencode({"chat_id": CHAT, "text": msg}).encode()
-              try:
-                  urllib.request.urlopen(f"https://api.telegram.org/bot{TOKEN}/sendMessage", data)
-                  print("Telegram message sent")
-              except Exception as e:
-                  print(f"Telegram send failed: {e}", file=sys.stderr)
-                  sys.exit(1)
+              req = urllib.request.Request(url, data=data)
+              resp = urllib.request.urlopen(req)
+              print(f"Telegram response: {resp.status}")
 
           try:
               with open("data/latest_screening.json") as f:
                   d = json.load(f)
           except Exception as e:
-              send(f"SCREENING ECHOUE\n\nErreur: {e}")
+              send(f"SCREENING ECHOUE\nErreur: {e}")
               sys.exit(0)
 
           m = d["macro"]
@@ -83,14 +82,14 @@ jobs:
           lines = []
           lines.append(f"SCREENING {d['timestamp_utc'][:10]}")
           lines.append(f"Feu macro : {feu} (HYG {m['hyg_last']} vs SMA100 {m['hyg_sma100']})")
-          lines.append(f"Univers : {d['universe_size']} titres | Screenes : {d['screened']}")
+          lines.append(f"Univers : {d['universe_size']} | Screenes : {d['screened']}")
           lines.append("")
 
           sigs = d.get("signals_complete", [])
           if sigs:
               lines.append(f"{len(sigs)} SIGNAUX COMPLETS :")
               for s in sigs:
-                  lines.append(f"  {s['ticker']} {s['price']}$ | mom3m {s['mom_3m']:+.0%} | stop {s['stop']}$ | risque {s['risk_pct']:.0%}")
+                  lines.append(f"  {s['ticker']} {s['price']}$ | mom3m {s['mom_3m']:+.0%} | stop {s['stop']}$")
               lines.append("")
           else:
               lines.append("Aucun signal complet")
@@ -109,7 +108,7 @@ jobs:
           if watch:
               lines.append(f"{len(watch)} en watchlist :")
               for s in watch[:5]:
-                  lines.append(f"  {s['ticker']} {s['price']}$ | mom3m {s['mom_3m']:+.0%} | dist {s['dist_hh60']:+.1%}")
+                  lines.append(f"  {s['ticker']} {s['price']}$ | mom3m {s['mom_3m']:+.0%}")
               if len(watch) > 5:
                   lines.append(f"  ... et {len(watch)-5} autres")
               lines.append("")
@@ -118,11 +117,11 @@ jobs:
           if early:
               lines.append(f"{len(early)} EARLY ROCKETS :")
               for s in early[:5]:
-                  lines.append(f"  {s['ticker']} {s['price']}$ | mom3m {s['mom_3m']:+.0%} | vs ATH {s['vs_ath']:+.0%}")
+                  lines.append(f"  {s['ticker']} {s['price']}$ | mom3m {s['mom_3m']:+.0%}")
               lines.append("")
 
           if sigs:
-              lines.append("Ouvre Claude Code pour valider les ordres")
+              lines.append("-> Ouvre Claude Code pour valider les ordres")
           else:
               lines.append("RAS - pas d'action requise ce soir")
 
