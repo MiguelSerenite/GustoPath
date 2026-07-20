@@ -1,0 +1,43 @@
+name: Daily Momentum Screener
+
+on:
+  schedule:
+    # 20:10 UTC = 16:10 EDT (New York) — apres cloture US
+    # Ajuste +1h en hiver (21:10 UTC = 16:10 EST)
+    - cron: '10 20 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force run even on non-trading days'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  screen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install yfinance pandas numpy lxml
+
+      - name: Run screener
+        run: python3 scripts/screener_json.py
+
+      - name: Commit results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          DATE=$(date -u +%Y-%m-%d)
+          git add data/
+          git diff --cached --quiet || {
+            git commit -m "data: screening results $DATE"
+            git push
+          }
