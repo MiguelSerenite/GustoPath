@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GustoPath — Espace gestionnaire</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E⚙️%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body data-theme="dark" class="admin-body">
+
+  <header class="topbar">
+    <div class="topbar__brand">
+      <span class="logo">⚙️</span>
+      <div>
+        <h1>GustoPath · Admin</h1>
+        <p class="tagline">gustopath.com — Tableau de bord du gestionnaire</p>
+      </div>
+    </div>
+    <nav class="topbar__nav">
+      <button class="nav-btn active" data-admin-view="dashboard"><span>📊</span> Dashboard</button>
+      <button class="nav-btn" data-admin-view="restaurants"><span>🍽️</span> Restaurants</button>
+      <button class="nav-btn" data-admin-view="reviews"><span>💬</span> Avis</button>
+      <button class="nav-btn" data-admin-view="settings"><span>🛠️</span> Paramètres</button>
+      <a href="index.html" class="nav-btn nav-btn--ghost"><span>↩️</span> Retour à l'app</a>
+      <button id="theme-toggle" class="icon-btn" title="Changer de thème">🌓</button>
+    </nav>
+  </header>
+
+  <section id="login-gate" class="geo-gate hidden">
+    <div class="glass card-lg">
+      <h2>🔒 Connexion gestionnaire</h2>
+      <p>Entrez vos identifiants.<br /><small>Démo : <strong>admin / admin</strong></small></p>
+      <form id="login-form" class="login-form">
+        <input id="login-user" type="text" placeholder="Identifiant" required />
+        <input id="login-pwd" type="password" placeholder="Mot de passe" required />
+        <button class="btn btn--primary btn--lg">Se connecter</button>
+        <p id="login-error" class="error-message"></p>
+      </form>
+    </div>
+  </section>
+
+  <main id="admin-dashboard" class="view admin-view hidden">
+    <section class="page-head"><h2>📊 Vue d'ensemble</h2><p>Suivi en temps réel.</p></section>
+    <div class="stat-grid">
+      <div class="stat-card glass"><span class="stat-card__icon">🍽️</span><div><p class="stat-card__label">Restaurants</p><p id="stat-restaurants" class="stat-card__value">—</p></div></div>
+      <div class="stat-card glass"><span class="stat-card__icon">💬</span><div><p class="stat-card__label">Avis publiés</p><p id="stat-reviews" class="stat-card__value">—</p></div></div>
+      <div class="stat-card glass"><span class="stat-card__icon">⭐</span><div><p class="stat-card__label">Note moyenne</p><p id="stat-avg-rating" class="stat-card__value">—</p></div></div>
+      <div class="stat-card glass"><span class="stat-card__icon">🥇</span><div><p class="stat-card__label">Cuisine top</p><p id="stat-top-cuisine" class="stat-card__value">—</p></div></div>
+    </div>
+    <div class="dashboard-grid">
+      <section class="glass card"><h3>🏆 Top 5 — Mieux notés</h3><div id="top-restaurants" class="top-list"></div></section>
+      <section class="glass card"><h3>📈 Répartition par cuisine</h3><div id="cuisine-bars" class="bars"></div></section>
+    </div>
+  </main>
+
+  <main id="admin-restaurants" class="view admin-view hidden">
+    <section class="page-head"><h2>🍽️ Gestion des restaurants</h2><p>Ajoutez, modifiez ou supprimez.</p></section>
+    <div class="toolbar">
+      <input id="admin-search" type="search" placeholder="Rechercher…" />
+      <button id="add-restaurant-btn" class="btn btn--primary">+ Nouveau restaurant</button>
+    </div>
+    <div class="table-wrapper glass">
+      <table class="data-table">
+        <thead><tr><th>Nom</th><th>Cuisine</th><th>Adresse</th><th>Prix</th><th>Note</th><th>Actions</th></tr></thead>
+        <tbody id="restaurants-table-body"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <main id="admin-reviews" class="view admin-view hidden">
+    <section class="page-head"><h2>💬 Modération des avis</h2><p>Supervisez et supprimez les avis inappropriés.</p></section>
+    <div id="reviews-list" class="reviews-admin-list"></div>
+  </main>
+
+  <main id="admin-settings" class="view admin-view hidden">
+    <section class="page-head"><h2>🛠️ Paramètres</h2></section>
+    <div class="settings-grid">
+      <div class="glass card"><h3>📦 Sauvegarder</h3><p>Export JSON complet.</p><button id="export-btn" class="btn btn--primary">Télécharger</button></div>
+      <div class="glass card"><h3>♻️ Réinitialiser</h3><p>Restaurer les données initiales.</p><button id="reset-btn" class="btn btn--danger">Tout réinitialiser</button></div>
+      <div class="glass card"><h3>🚪 Déconnexion</h3><p>Quitter l'espace gestionnaire.</p><button id="logout-btn" class="btn btn--ghost">Se déconnecter</button></div>
+    </div>
+  </main>
+
+  <div id="restaurant-form-modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__panel glass">
+      <button class="modal__close icon-btn" data-close>✕</button>
+      <h2 id="form-title">Nouveau restaurant</h2>
+      <form id="restaurant-form" class="restaurant-form">
+        <input type="hidden" id="form-id" />
+        <label>Nom <input type="text" id="form-name" required /></label>
+        <label>Type de cuisine <select id="form-cuisine" required></select></label>
+        <label>Adresse complète <input type="text" id="form-address" required /></label>
+        <div class="form-row">
+          <label>Latitude <input type="number" id="form-lat" step="0.0001" required /></label>
+          <label>Longitude <input type="number" id="form-lng" step="0.0001" required /></label>
+        </div>
+        <button type="button" id="locate-btn" class="btn btn--ghost">📍 Utiliser ma position</button>
+        <div class="form-row">
+          <label>Prix (1-4) <input type="number" id="form-price" min="1" max="4" value="2" required /></label>
+          <label>Téléphone <input type="tel" id="form-phone" /></label>
+        </div>
+        <label>Description <textarea id="form-description" rows="3"></textarea></label>
+        <div class="form-actions">
+          <button type="button" class="btn btn--ghost" data-close>Annuler</button>
+          <button type="submit" class="btn btn--primary">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/geo.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GustoPath — Trouvez votre prochain restaurant</title>
+  <meta name="description" content="GustoPath : recherchez des restaurants autour de vous, filtrez par cuisine, distance et notes, gardez vos favoris et notez vos visites." />
+  <meta name="theme-color" content="#ff6b6b" />
+  <meta property="og:title" content="GustoPath" />
+  <meta property="og:description" content="Trouvez le restaurant parfait autour de vous." />
+  <meta property="og:url" content="https://gustopath.com" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🍽️%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body data-theme="dark">
+
+  <header class="topbar">
+    <div class="topbar__brand">
+      <span class="logo">🍽️</span>
+      <div>
+        <h1>GustoPath</h1>
+        <p class="tagline">gustopath.com — Votre prochaine table, à portée de main</p>
+      </div>
+    </div>
+    <nav class="topbar__nav">
+      <button class="nav-btn active" data-view="search"><span>🔍</span> Rechercher</button>
+      <button class="nav-btn" data-view="favorites"><span>❤️</span> Favoris</button>
+      <button class="nav-btn" data-view="visited"><span>📒</span> Mes visites</button>
+      <button class="nav-btn" data-view="map"><span>🗺️</span> Carte</button>
+      <a href="admin.html" class="nav-btn nav-btn--ghost"><span>⚙️</span> Espace gestionnaire</a>
+      <button id="theme-toggle" class="icon-btn" title="Changer de thème">🌓</button>
+    </nav>
+  </header>
+
+  <section id="geo-gate" class="geo-gate">
+    <div class="glass card-lg">
+      <h2>📍 Activez votre géolocalisation</h2>
+      <p>GustoPath a besoin de votre position pour vous proposer les meilleurs restaurants <strong>autour de vous</strong>. Aucune donnée n'est envoyée à un serveur, tout reste sur votre appareil.</p>
+      <button id="enable-geo" class="btn btn--primary btn--lg">Activer ma localisation</button>
+      <p id="geo-error" class="error-message"></p>
+    </div>
+  </section>
+
+  <main id="view-search" class="view hidden">
+    <section class="hero glass">
+      <div class="hero__head">
+        <h2>Que mange-t-on aujourd'hui ?</h2>
+        <p class="hero__sub" id="user-location-label">📍 Localisation en cours…</p>
+      </div>
+      <div class="search-bar">
+        <span class="search-bar__icon">🔍</span>
+        <input id="search-input" type="search" placeholder="Nom du restaurant, plat, ville…" />
+        <button id="open-filters" class="btn btn--ghost">⚙️ Filtres</button>
+      </div>
+      <div id="cuisine-chips" class="chips"></div>
+    </section>
+
+    <aside id="filters-panel" class="filters-panel glass hidden">
+      <div class="filters-panel__head">
+        <h3>Filtres avancés</h3>
+        <button id="close-filters" class="icon-btn">✕</button>
+      </div>
+      <div class="filter-group">
+        <label>Distance maximale : <span id="distance-value">10</span> km</label>
+        <input id="distance-slider" type="range" min="1" max="50" value="10" />
+      </div>
+      <div class="filter-group">
+        <label>Note minimale : <span id="rating-value">0</span> ★</label>
+        <input id="rating-slider" type="range" min="0" max="5" step="0.5" value="0" />
+      </div>
+      <div class="filter-group">
+        <label>Budget maximum</label>
+        <div class="price-buttons" id="price-buttons">
+          <button data-price="1">€</button>
+          <button data-price="2">€€</button>
+          <button data-price="3">€€€</button>
+          <button data-price="4" class="active">€€€€</button>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Types de cuisine</label>
+        <div id="cuisine-checkboxes" class="cuisine-checks"></div>
+      </div>
+      <div class="filters-panel__actions">
+        <button id="reset-filters" class="btn btn--ghost">Réinitialiser</button>
+        <button id="apply-filters" class="btn btn--primary">Appliquer</button>
+      </div>
+    </aside>
+
+    <section class="results">
+      <div class="results__head">
+        <h3 id="results-count">0 restaurant trouvé</h3>
+        <select id="sort-select">
+          <option value="distance">Trier par distance</option>
+          <option value="rating">Trier par note</option>
+          <option value="name">Trier par nom</option>
+          <option value="price">Trier par prix</option>
+        </select>
+      </div>
+      <div id="results-grid" class="results__grid"></div>
+      <p id="no-results" class="empty-state hidden">Aucun restaurant ne correspond à vos critères.</p>
+    </section>
+  </main>
+
+  <main id="view-favorites" class="view hidden">
+    <section class="page-head"><h2>❤️ Mes restaurants favoris</h2><p>Retrouvez ici vos coups de cœur.</p></section>
+    <div id="favorites-grid" class="results__grid"></div>
+    <p id="no-favorites" class="empty-state hidden">Aucun favori. Cliquez sur ❤️ pour en ajouter.</p>
+  </main>
+
+  <main id="view-visited" class="view hidden">
+    <section class="page-head"><h2>📒 Mes visites</h2><p>Vos restaurants testés et vos notes personnelles.</p></section>
+    <div id="visited-grid" class="results__grid"></div>
+    <p id="no-visited" class="empty-state hidden">Aucune visite enregistrée.</p>
+  </main>
+
+  <main id="view-map" class="view hidden">
+    <section class="page-head"><h2>🗺️ Carte des restaurants</h2><p>Vue d'ensemble autour de vous.</p></section>
+    <div id="map" class="map-container"></div>
+  </main>
+
+  <div id="restaurant-modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__panel glass">
+      <button class="modal__close icon-btn" data-close>✕</button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/geo.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
