@@ -44,90 +44,87 @@ jobs:
       - name: Send Telegram report
         if: always()
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RAW_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          RAW_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
+          # Clean whitespace/newlines from secrets
+          export TELEGRAM_BOT_TOKEN=$(echo "$RAW_TOKEN" | tr -d '[:space:]')
+          export TELEGRAM_CHAT_ID=$(echo "$RAW_CHAT" | tr -d '[:space:]')
+          
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            echo "Telegram secrets not configured, skipping"
+            exit 0
+          fi
+          
           python3 << 'PYEOF'
-          import json, os, urllib.request, urllib.parse
+          import json, os, urllib.request, urllib.parse, sys
 
-          TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
-          CHAT  = os.environ.get("TELEGRAM_CHAT_ID", "")
-          if not TOKEN or not CHAT:
-              print("Telegram secrets not configured, skipping")
-              exit(0)
+          TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
+          CHAT  = os.environ["TELEGRAM_CHAT_ID"]
 
-          # Load screening results
+          def send(msg):
+              data = urllib.parse.urlencode({"chat_id": CHAT, "text": msg}).encode()
+              try:
+                  urllib.request.urlopen(f"https://api.telegram.org/bot{TOKEN}/sendMessage", data)
+                  print("Telegram message sent")
+              except Exception as e:
+                  print(f"Telegram send failed: {e}", file=sys.stderr)
+                  sys.exit(1)
+
           try:
               with open("data/latest_screening.json") as f:
                   d = json.load(f)
           except Exception as e:
-              msg = f"⚠️ SCREENING ECHOUE\n\nErreur: {e}"
-              data = urllib.parse.urlencode({"chat_id": CHAT, "text": msg}).encode()
-              urllib.request.urlopen(f"https://api.telegram.org/bot{TOKEN}/sendMessage", data)
-              exit(0)
+              send(f"SCREENING ECHOUE\n\nErreur: {e}")
+              sys.exit(0)
 
-          # Build report
           m = d["macro"]
-          feu = "✅ VERT" if m["status"] == "VERT" else "🔴 ROUGE"
+          feu = "VERT" if m["status"] == "VERT" else "ROUGE"
           lines = []
-          lines.append(f"📊 SCREENING {d['timestamp_utc'][:10]}")
+          lines.append(f"SCREENING {d['timestamp_utc'][:10]}")
           lines.append(f"Feu macro : {feu} (HYG {m['hyg_last']} vs SMA100 {m['hyg_sma100']})")
           lines.append(f"Univers : {d['universe_size']} titres | Screenes : {d['screened']}")
           lines.append("")
 
-          # Signals
           sigs = d.get("signals_complete", [])
           if sigs:
-              lines.append(f"🚨 {len(sigs)} SIGNAUX COMPLETS :")
+              lines.append(f"{len(sigs)} SIGNAUX COMPLETS :")
               for s in sigs:
                   lines.append(f"  {s['ticker']} {s['price']}$ | mom3m {s['mom_3m']:+.0%} | stop {s['stop']}$ | risque {s['risk_pct']:.0%}")
               lines.append("")
           else:
-              lines.append("✅ Aucun signal complet")
+              lines.append("Aucun signal complet")
               lines.append("")
 
-          # Breakouts
           brk = d.get("breakouts_no_volume", [])
           if brk:
-              lines.append(f"⚡ {len(brk)} breakouts sans volume :")
+              lines.append(f"{len(brk)} breakouts sans volume :")
               for s in brk[:5]:
                   lines.append(f"  {s['ticker']} {s['price']}$ | mom3m {s['mom_3m']:+.0%}")
               if len(brk) > 5:
                   lines.append(f"  ... et {len(brk)-5} autres")
               lines.append("")
 
-          # Watchlist
           watch = d.get("watchlist", [])
           if watch:
-              lines.append(f"👀 {len(watch)} en watchlist :")
+              lines.append(f"{len(watch)} en watchlist :")
               for s in watch[:5]:
                   lines.append(f"  {s['ticker']} {s['price']}$ | mom3m {s['mom_3m']:+.0%} | dist {s['dist_hh60']:+.1%}")
               if len(watch) > 5:
                   lines.append(f"  ... et {len(watch)-5} autres")
               lines.append("")
 
-          # Early rockets
           early = d.get("early_signals", [])
           if early:
-              lines.append(f"🚀 {len(early)} EARLY ROCKETS :")
+              lines.append(f"{len(early)} EARLY ROCKETS :")
               for s in early[:5]:
                   lines.append(f"  {s['ticker']} {s['price']}$ | mom3m {s['mom_3m']:+.0%} | vs ATH {s['vs_ath']:+.0%}")
               lines.append("")
 
-          # Footer
           if sigs:
-              lines.append("➡️ Ouvre Claude Code pour valider les ordres")
+              lines.append("Ouvre Claude Code pour valider les ordres")
           else:
-              lines.append("✅ RAS — pas d'action requise ce soir")
+              lines.append("RAS - pas d'action requise ce soir")
 
-          msg = "\n".join(lines)
-
-          # Send
-          data = urllib.parse.urlencode({
-              "chat_id": CHAT,
-              "text": msg,
-              "parse_mode": ""
-          }).encode()
-          urllib.request.urlopen(f"https://api.telegram.org/bot{TOKEN}/sendMessage", data)
-          print("Telegram report sent")
+          send("\n".join(lines))
           PYEOF
