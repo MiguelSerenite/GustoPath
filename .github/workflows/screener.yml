@@ -3,7 +3,6 @@ name: Daily Momentum Screener
 on:
   schedule:
     # 20:10 UTC = 16:10 EDT (New York) — apres cloture US
-    # Ajuste +1h en hiver (21:10 UTC = 16:10 EST)
     - cron: '10 20 * * 1-5'
   workflow_dispatch:
     inputs:
@@ -41,3 +40,94 @@ jobs:
             git commit -m "data: screening results $DATE"
             git push
           }
+
+      - name: Send Telegram report
+        if: always()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 << 'PYEOF'
+          import json, os, urllib.request, urllib.parse
+
+          TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+          CHAT  = os.environ.get("TELEGRAM_CHAT_ID", "")
+          if not TOKEN or not CHAT:
+              print("Telegram secrets not configured, skipping")
+              exit(0)
+
+          # Load screening results
+          try:
+              with open("data/latest_screening.json") as f:
+                  d = json.load(f)
+          except Exception as e:
+              msg = f"⚠️ SCREENING ECHOUE\n\nErreur: {e}"
+              data = urllib.parse.urlencode({"chat_id": CHAT, "text": msg}).encode()
+              urllib.request.urlopen(f"https://api.telegram.org/bot{TOKEN}/sendMessage", data)
+              exit(0)
+
+          # Build report
+          m = d["macro"]
+          feu = "✅ VERT" if m["status"] == "VERT" else "🔴 ROUGE"
+          lines = []
+          lines.append(f"📊 SCREENING {d['timestamp_utc'][:10]}")
+          lines.append(f"Feu macro : {feu} (HYG {m['hyg_last']} vs SMA100 {m['hyg_sma100']})")
+          lines.append(f"Univers : {d['universe_size']} titres | Screenes : {d['screened']}")
+          lines.append("")
+
+          # Signals
+          sigs = d.get("signals_complete", [])
+          if sigs:
+              lines.append(f"🚨 {len(sigs)} SIGNAUX COMPLETS :")
+              for s in sigs:
+                  lines.append(f"  {s['ticker']} {s['price']}$ | mom3m {s['mom_3m']:+.0%} | stop {s['stop']}$ | risque {s['risk_pct']:.0%}")
+              lines.append("")
+          else:
+              lines.append("✅ Aucun signal complet")
+              lines.append("")
+
+          # Breakouts
+          brk = d.get("breakouts_no_volume", [])
+          if brk:
+              lines.append(f"⚡ {len(brk)} breakouts sans volume :")
+              for s in brk[:5]:
+                  lines.append(f"  {s['ticker']} {s['price']}$ | mom3m {s['mom_3m']:+.0%}")
+              if len(brk) > 5:
+                  lines.append(f"  ... et {len(brk)-5} autres")
+              lines.append("")
+
+          # Watchlist
+          watch = d.get("watchlist", [])
+          if watch:
+              lines.append(f"👀 {len(watch)} en watchlist :")
+              for s in watch[:5]:
+                  lines.append(f"  {s['ticker']} {s['price']}$ | mom3m {s['mom_3m']:+.0%} | dist {s['dist_hh60']:+.1%}")
+              if len(watch) > 5:
+                  lines.append(f"  ... et {len(watch)-5} autres")
+              lines.append("")
+
+          # Early rockets
+          early = d.get("early_signals", [])
+          if early:
+              lines.append(f"🚀 {len(early)} EARLY ROCKETS :")
+              for s in early[:5]:
+                  lines.append(f"  {s['ticker']} {s['price']}$ | mom3m {s['mom_3m']:+.0%} | vs ATH {s['vs_ath']:+.0%}")
+              lines.append("")
+
+          # Footer
+          if sigs:
+              lines.append("➡️ Ouvre Claude Code pour valider les ordres")
+          else:
+              lines.append("✅ RAS — pas d'action requise ce soir")
+
+          msg = "\n".join(lines)
+
+          # Send
+          data = urllib.parse.urlencode({
+              "chat_id": CHAT,
+              "text": msg,
+              "parse_mode": ""
+          }).encode()
+          urllib.request.urlopen(f"https://api.telegram.org/bot{TOKEN}/sendMessage", data)
+          print("Telegram report sent")
+          PYEOF
