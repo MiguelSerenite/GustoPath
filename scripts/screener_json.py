@@ -10,6 +10,7 @@ Sortie : data/screening_YYYY-MM-DD.json + data/latest_screening.json (symlink lo
 import json
 import sys
 import os
+import io
 from datetime import datetime, timezone
 
 import yfinance as yf
@@ -23,10 +24,13 @@ def _wiki_symbols(page):
         f"https://en.wikipedia.org/wiki/{page}",
         headers={"User-Agent": "Mozilla/5.0"}
     )
-    html = urllib.request.urlopen(req, timeout=30).read()
-    t = pd.read_html(html)[0]
-    col = "Symbol" if "Symbol" in t.columns else "Ticker symbol"
-    return set(t[col].astype(str).str.replace(".", "-", regex=False))
+    html = urllib.request.urlopen(req, timeout=30).read().decode("utf-8")
+    tables = pd.read_html(io.StringIO(html))
+    for t in tables:
+        for col in ("Symbol", "Ticker symbol", "Ticker"):
+            if col in t.columns:
+                return set(t[col].astype(str).str.replace(".", "-", regex=False))
+    raise ValueError(f"No symbol column found in {page}")
 
 def get_universe():
     return sorted(

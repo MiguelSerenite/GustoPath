@@ -14,6 +14,7 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 import urllib.request
+import io
 
 # ---------- 1. Univers mécanique V2 : S&P 500 + S&P 400 MidCap ----------
 # V2 validée : la stratégie EARLY passe de +162 % (S&P 500 seul) à +304 % (CAGR +32 %)
@@ -21,10 +22,13 @@ import urllib.request
 def _wiki_symbols(page):
     req = urllib.request.Request(f"https://en.wikipedia.org/wiki/{page}",
                                  headers={"User-Agent": "Mozilla/5.0"})
-    html = urllib.request.urlopen(req).read()
-    t = pd.read_html(html)[0]
-    col = "Symbol" if "Symbol" in t.columns else "Ticker symbol"
-    return set(t[col].astype(str).str.replace(".", "-", regex=False))
+    html = urllib.request.urlopen(req).read().decode("utf-8")
+    tables = pd.read_html(io.StringIO(html))
+    for t in tables:
+        for col in ("Symbol", "Ticker symbol", "Ticker"):
+            if col in t.columns:
+                return set(t[col].astype(str).str.replace(".", "-", regex=False))
+    raise ValueError(f"No symbol column found in {page}")
 
 def get_universe():
     return sorted(_wiki_symbols("List_of_S%26P_500_companies")
