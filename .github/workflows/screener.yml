@@ -40,41 +40,17 @@ jobs:
             git push
           }
 
-      - name: Send Telegram report
+      - name: Build Telegram report
         if: always()
-        continue-on-error: true
-        env:
-          RAW_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          RAW_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           python3 << 'PYEOF'
-          import json, os, urllib.request, urllib.parse, sys, re
-
-          # Aggressive sanitization: keep only alphanumeric, colon, dash
-          raw_token = os.environ.get("RAW_TOKEN", "")
-          raw_chat = os.environ.get("RAW_CHAT", "")
-          TOKEN = re.sub(r'[^a-zA-Z0-9:\-_]', '', raw_token)
-          CHAT = re.sub(r'[^0-9]', '', raw_chat)
-
-          if not TOKEN or not CHAT:
-              print("Telegram secrets not configured, skipping")
-              sys.exit(0)
-
-          print(f"Token length: {len(TOKEN)}, Chat ID: {CHAT}")
-          print(f"Token starts with: {TOKEN[:12]}...")
-
-          def send(msg):
-              url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-              data = urllib.parse.urlencode({"chat_id": CHAT, "text": msg}).encode()
-              req = urllib.request.Request(url, data=data)
-              resp = urllib.request.urlopen(req)
-              print(f"Telegram response: {resp.status}")
-
+          import json, sys
           try:
               with open("data/latest_screening.json") as f:
                   d = json.load(f)
           except Exception as e:
-              send(f"SCREENING ECHOUE\nErreur: {e}")
+              with open("/tmp/telegram_msg.txt", "w") as f:
+                  f.write(f"SCREENING ECHOUE\nErreur: {e}")
               sys.exit(0)
 
           m = d["macro"]
@@ -125,5 +101,46 @@ jobs:
           else:
               lines.append("RAS - pas d'action requise ce soir")
 
-          send("\n".join(lines))
+          with open("/tmp/telegram_msg.txt", "w") as f:
+              f.write("\n".join(lines))
+          print("Report built successfully")
           PYEOF
+
+      - name: Send Telegram
+        if: always()
+        continue-on-error: true
+        run: |
+          # Sanitize: strip ALL whitespace, control chars, BOM, zero-width chars
+          TOKEN=$(echo "${{ secrets.TELEGRAM_BOT_TOKEN }}" | sed 's/[^a-zA-Z0-9:_-]//g')
+          CHATID=$(echo "${{ secrets.TELEGRAM_CHAT_ID }}" | sed 's/[^0-9]//g')
+          
+          echo "Token length: ${#TOKEN}"
+          echo "Token prefix: ${TOKEN:0:12}..."
+          echo "Chat ID: $CHATID"
+          
+          if [ -z "$TOKEN" ] || [ -z "$CHATID" ]; then
+            echo "ERROR: Token or Chat ID empty after sanitization"
+            exit 1
+          fi
+          
+          MSG=$(cat /tmp/telegram_msg.txt 2>/dev/null || echo "Screening termine - voir GitHub pour details")
+          
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -d chat_id="$CHATID" \
+            --data-urlencode text="$MSG")
+          
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          
+          echo "HTTP Code: $HTTP_CODE"
+          echo "Response: $BODY"
+          
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "TELEGRAM FAILED - check token and chat_id"
+            echo "If 401: token is invalid - regenerate from @BotFather"
+            echo "If 400: chat_id is wrong or bot hasn't been started"
+            exit 1
+          fi
+          
+          echo "Telegram sent successfully!"
