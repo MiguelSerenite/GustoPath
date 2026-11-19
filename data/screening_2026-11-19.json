@@ -1,0 +1,273 @@
+{
+  "timestamp_utc": "2026-11-19T20:16:22.096562+00:00",
+  "macro": {
+    "status": "ROUGE",
+    "hyg_last": 76.64,
+    "hyg_sma100": 77.62
+  },
+  "signals_complete": [],
+  "breakouts_no_volume": [],
+  "watchlist": [
+    {
+      "ticker": "BILL",
+      "price": 64.82,
+      "mom_3m": 0.3555,
+      "mom_6m": 0.7783,
+      "stop": 56.05,
+      "risk_pct": 0.1353,
+      "atr14": 2.92,
+      "sma50": 48.96,
+      "sma200": 43.3,
+      "dist_hh60": -0.0258,
+      "dvol_m": 118.6,
+      "vol_ratio": 1.02
+    },
+    {
+      "ticker": "OPCH",
+      "price": 31.61,
+      "mom_3m": 0.334,
+      "mom_6m": 0.4691,
+      "stop": 31.17,
+      "risk_pct": 0.014,
+      "atr14": 0.15,
+      "sma50": 28.71,
+      "sma200": 26.07,
+      "dist_hh60": -0.0089,
+      "dvol_m": 112.9,
+      "vol_ratio": 0.51
+    },
+    {
+      "ticker": "VNT",
+      "price": 43.67,
+      "mom_3m": 0.3253,
+      "mom_6m": 0.5127,
+      "stop": 38.43,
+      "risk_pct": 0.12,
+      "atr14": 1.75,
+      "sma50": 35.22,
+      "sma200": 34.0,
+      "dist_hh60": -0.0181,
+      "dvol_m": 71.6,
+      "vol_ratio": 0.42
+    },
+    {
+      "ticker": "CROX",
+      "price": 158.15,
+      "mom_3m": 0.2951,
+      "mom_6m": 0.4518,
+      "stop": 140.26,
+      "risk_pct": 0.1132,
+      "atr14": 5.96,
+      "sma50": 131.48,
+      "sma200": 115.06,
+      "dist_hh60": -0.0371,
+      "dvol_m": 214.6,
+      "vol_ratio": 0.38
+    },
+    {
+      "ticker": "PTC",
+      "price": 195.53,
+      "mom_3m": 0.2641,
+      "mom_6m": 0.3407,
+      "stop": 192.59,
+      "risk_pct": 0.015,
+      "atr14": 0.98,
+      "sma50": 176.33,
+      "sma200": 149.57,
+      "dist_hh60": -0.0064,
+      "dvol_m": 326.3,
+      "vol_ratio": 1.03
+    },
+    {
+      "ticker": "CDW",
+      "price": 168.34,
+      "mom_3m": 0.2324,
+      "mom_6m": 0.5919,
+      "stop": 143.25,
+      "risk_pct": 0.149,
+      "atr14": 8.36,
+      "sma50": 152.4,
+      "sma200": 134.96,
+      "dist_hh60": -0.0391,
+      "dvol_m": 261.6,
+      "vol_ratio": 0.39
+    }
+  ],
+  "early_signals": [],
+  "early_watchlist": [
+    {
+      "ticker": "GME",
+      "price": 27.26,
+      "mom_3m": 0.497,
+      "vs_ath": -0.2388,
+      "stop": 24.28,
+      "atr14": 0.99,
+      "sma50": 24.78,
+      "dist_52w": -0.0367
+    },
+    {
+      "ticker": "BILL",
+      "price": 64.82,
+      "mom_3m": 0.3555,
+      "vs_ath": -0.353,
+      "stop": 56.05,
+      "atr14": 2.92,
+      "sma50": 48.96,
+      "dist_52w": -0.0258
+    },
+    {
+      "ticker": "FCN",
+      "price": 204.07,
+      "mom_3m": 0.3103,
+      "vs_ath": -0.0222,
+      "stop": 183.57,
+      "atr14": 6.83,
+      "sma50": 160.37,
+      "dist_52w": -0.0222
+    },
+    {
+      "ticker": "CROX",
+      "price": 158.15,
+      "mom_3m": 0.2951,
+      "vs_ath": -0.0371,
+      "stop": 140.26,
+      "atr14": 5.96,
+      "sma50": 131.48,
+      "dist_52w": -0.0371
+    },
+    {
+      "ticker": "EXPO",
+      "price": 88.82,
+      "mom_3m": 0.2706,
+      "vs_ath": -0.095,
+      "stop": 80.78,
+      "atr14": 2.68,
+      "sma50": 74.96,
+      "dist_52w": -0.0187
+    },
+    {
+      "ticker": "PTC",
+      "price": 195.53,
+      "mom_3m": 0.2641,
+      "vs_ath": -0.11,
+      "stop": 192.59,
+      "atr14": 0.98,
+      "sma50": 176.33,
+      "dist_52w": -0.0064
+    },
+    {
+      "ticker": "COLM",
+      "price": 74.68,
+      "mom_3m": 0.2379,
+      "vs_ath": -0.1674,
+      "stop": 66.89,
+      "atr14": 2.6,
+      "sma50": 62.57,
+      "dist_52w": -0.0385
+    },
+    {
+      "ticker": "CDW",
+      "price": 168.34,
+      "mom_3m": 0.2324,
+      "vs_ath": -0.2213,
+      "stop": 143.25,
+      "atr14": 8.36,
+      "sma50": 152.4,
+      "dist_52w": -0.0391
+    },
+    {
+      "ticker": "CAH",
+      "price": 274.12,
+      "mom_3m": 0.1971,
+      "vs_ath": -0.0425,
+      "stop": 252.93,
+      "atr14": 7.06,
+      "sma50": 247.08,
+      "dist_52w": -0.0425
+    },
+    {
+      "ticker": "VLTO",
+      "price": 116.71,
+      "mom_3m": 0.1832,
+      "vs_ath": -0.0302,
+      "stop": 108.29,
+      "atr14": 2.81,
+      "sma50": 103.84,
+      "dist_52w": -0.0302
+    },
+    {
+      "ticker": "PG",
+      "price": 168.32,
+      "mom_3m": 0.1711,
+      "vs_ath": -0.0304,
+      "stop": 158.32,
+      "atr14": 3.33,
+      "sma50": 155.78,
+      "dist_52w": -0.0304
+    },
+    {
+      "ticker": "MAR",
+      "price": 415.34,
+      "mom_3m": 0.1654,
+      "vs_ath": -0.0414,
+      "stop": 380.7,
+      "atr14": 11.55,
+      "sma50": 382.08,
+      "dist_52w": -0.0414
+    },
+    {
+      "ticker": "EW",
+      "price": 103.91,
+      "mom_3m": 0.1573,
+      "vs_ath": -0.0379,
+      "stop": 93.51,
+      "atr14": 3.47,
+      "sma50": 91.87,
+      "dist_52w": -0.0379
+    },
+    {
+      "ticker": "COST",
+      "price": 1090.52,
+      "mom_3m": 0.1524,
+      "vs_ath": -0.0295,
+      "stop": 1027.62,
+      "atr14": 20.97,
+      "sma50": 981.74,
+      "dist_52w": -0.0295
+    },
+    {
+      "ticker": "BJ",
+      "price": 110.96,
+      "mom_3m": 0.1509,
+      "vs_ath": -0.0837,
+      "stop": 103.47,
+      "atr14": 2.5,
+      "sma50": 101.62,
+      "dist_52w": -0.021
+    },
+    {
+      "ticker": "BRK-B",
+      "price": 570.65,
+      "mom_3m": 0.1509,
+      "vs_ath": -0.044,
+      "stop": 534.81,
+      "atr14": 11.95,
+      "sma50": 535.64,
+      "dist_52w": -0.044
+    },
+    {
+      "ticker": "ALLE",
+      "price": 186.09,
+      "mom_3m": 0.1506,
+      "vs_ath": -0.0478,
+      "stop": 172.61,
+      "atr14": 4.49,
+      "sma50": 167.53,
+      "dist_52w": -0.0478
+    }
+  ],
+  "satellite": [],
+  "universe_size": 903,
+  "screened": 898,
+  "errors": []
+}
