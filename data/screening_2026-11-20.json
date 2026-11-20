@@ -1,0 +1,189 @@
+{
+  "timestamp_utc": "2026-11-20T20:15:47.819533+00:00",
+  "macro": {
+    "status": "ROUGE",
+    "hyg_last": 76.39,
+    "hyg_sma100": 77.61
+  },
+  "signals_complete": [],
+  "breakouts_no_volume": [],
+  "watchlist": [
+    {
+      "ticker": "OPCH",
+      "price": 31.61,
+      "mom_3m": 0.3354,
+      "mom_6m": 0.5103,
+      "stop": 31.19,
+      "risk_pct": 0.0132,
+      "atr14": 0.14,
+      "sma50": 28.87,
+      "sma200": 26.06,
+      "dist_hh60": -0.0091,
+      "dvol_m": 113.2,
+      "vol_ratio": 0.55
+    },
+    {
+      "ticker": "FCN",
+      "price": 206.7,
+      "mom_3m": 0.3291,
+      "mom_6m": 0.3414,
+      "stop": 187.49,
+      "risk_pct": 0.093,
+      "atr14": 6.4,
+      "sma50": 161.54,
+      "sma200": 161.47,
+      "dist_hh60": -0.0096,
+      "dvol_m": 100.8,
+      "vol_ratio": 0.6
+    },
+    {
+      "ticker": "VNT",
+      "price": 42.98,
+      "mom_3m": 0.2948,
+      "mom_6m": 0.4538,
+      "stop": 37.73,
+      "risk_pct": 0.1221,
+      "atr14": 1.75,
+      "sma50": 35.41,
+      "sma200": 33.99,
+      "dist_hh60": -0.0398,
+      "dvol_m": 73.3,
+      "vol_ratio": 0.51
+    },
+    {
+      "ticker": "PTC",
+      "price": 195.27,
+      "mom_3m": 0.2654,
+      "mom_6m": 0.3173,
+      "stop": 192.35,
+      "risk_pct": 0.0149,
+      "atr14": 0.97,
+      "sma50": 177.62,
+      "sma200": 149.77,
+      "dist_hh60": -0.0077,
+      "dvol_m": 332.3,
+      "vol_ratio": 0.92
+    },
+    {
+      "ticker": "MCK",
+      "price": 1078.93,
+      "mom_3m": 0.2361,
+      "mom_6m": 0.4114,
+      "stop": 991.78,
+      "risk_pct": 0.0808,
+      "atr14": 29.05,
+      "sma50": 974.51,
+      "sma200": 878.76,
+      "dist_hh60": -0.038,
+      "dvol_m": 727.0,
+      "vol_ratio": 0.46
+    }
+  ],
+  "early_signals": [],
+  "early_watchlist": [
+    {
+      "ticker": "FCN",
+      "price": 206.7,
+      "mom_3m": 0.3291,
+      "vs_ath": -0.0096,
+      "stop": 187.49,
+      "atr14": 6.4,
+      "sma50": 161.54,
+      "dist_52w": -0.0096
+    },
+    {
+      "ticker": "EXPO",
+      "price": 89.76,
+      "mom_3m": 0.2739,
+      "vs_ath": -0.0853,
+      "stop": 82.71,
+      "atr14": 2.35,
+      "sma50": 75.41,
+      "dist_52w": -0.0082
+    },
+    {
+      "ticker": "PTC",
+      "price": 195.27,
+      "mom_3m": 0.2654,
+      "vs_ath": -0.1112,
+      "stop": 192.35,
+      "atr14": 0.97,
+      "sma50": 177.62,
+      "dist_52w": -0.0077
+    },
+    {
+      "ticker": "COLM",
+      "price": 75.17,
+      "mom_3m": 0.2561,
+      "vs_ath": -0.1586,
+      "stop": 67.86,
+      "atr14": 2.44,
+      "sma50": 62.69,
+      "dist_52w": -0.0284
+    },
+    {
+      "ticker": "MCK",
+      "price": 1078.93,
+      "mom_3m": 0.2361,
+      "vs_ath": -0.038,
+      "stop": 991.78,
+      "atr14": 29.05,
+      "sma50": 974.51,
+      "dist_52w": -0.038
+    },
+    {
+      "ticker": "WMT",
+      "price": 128.88,
+      "mom_3m": 0.2103,
+      "vs_ath": -0.0441,
+      "stop": 119.44,
+      "atr14": 3.15,
+      "sma50": 116.66,
+      "dist_52w": -0.0441
+    },
+    {
+      "ticker": "CAH",
+      "price": 274.55,
+      "mom_3m": 0.1843,
+      "vs_ath": -0.041,
+      "stop": 253.53,
+      "atr14": 7.01,
+      "sma50": 247.85,
+      "dist_52w": -0.041
+    },
+    {
+      "ticker": "VLTO",
+      "price": 117.35,
+      "mom_3m": 0.1825,
+      "vs_ath": -0.0249,
+      "stop": 109.65,
+      "atr14": 2.57,
+      "sma50": 104.29,
+      "dist_52w": -0.0249
+    },
+    {
+      "ticker": "PG",
+      "price": 170.54,
+      "mom_3m": 0.171,
+      "vs_ath": -0.0176,
+      "stop": 160.33,
+      "atr14": 3.4,
+      "sma50": 156.29,
+      "dist_52w": -0.0176
+    },
+    {
+      "ticker": "GILD",
+      "price": 168.09,
+      "mom_3m": 0.1519,
+      "vs_ath": -0.0481,
+      "stop": 154.12,
+      "atr14": 4.66,
+      "sma50": 157.28,
+      "dist_52w": -0.0481
+    }
+  ],
+  "satellite": [],
+  "universe_size": 903,
+  "screened": 899,
+  "errors": []
+}
